@@ -287,101 +287,154 @@
         </footer>
     </div>
 
-<script>
-const API_URL = '/.netlify/functions/query';
-const bookForm = document.getElementById('book-form');
-const booksContainer = document.getElementById('books-container');
-const statusMessage = document.getElementById('status-message');
+    <script>
+        // This would be replaced with your actual Neon serverless API endpoints
+        const API_BASE_URL = 'https://your-neon-serverless-api.vercel.app/api';
 
-function showStatus(message, isSuccess) {
-  statusMessage.textContent = message;
-  statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
-  setTimeout(() => (statusMessage.style.display = 'none'), 5000);
-}
+        // DOM elements
+        const bookForm = document.getElementById('book-form');
+        const booksContainer = document.getElementById('books-container');
+        const statusMessage = document.getElementById('status-message');
 
-async function fetchBooks() {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: 'SELECT id, title, author, year, description FROM books ORDER BY created_at DESC;'
-      })
-    });
-    if (!response.ok) throw new Error('Failed to fetch books');
-    const data = await response.json();
-    displayBooks(data.rows || []);
-  } catch (err) {
-    console.error(err);
-    showStatus('Failed to load books.', false);
-  }
-}
+        // Function to show status message
+        function showStatus(message, isSuccess) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
 
-function displayBooks(books) {
-  if (books.length === 0) {
-    booksContainer.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-book-open"></i>
-        <h3>No books in your collection yet</h3>
-        <p>Add your first book using the form on the right</p>
-      </div>`;
-    return;
-  }
-  booksContainer.innerHTML = books
-    .map(
-      (b) => `
-      <div class="book-card" data-id="${b.id}">
-        <div class="book-title">${b.title}</div>
-        <div class="book-author">by ${b.author}</div>
-        <div class="book-year">${b.year}</div>
-        <div class="book-description">${b.description || ''}</div>
-      </div>`
-    )
-    .join('');
-}
+        // Function to fetch books from the database
+        async function fetchBooks() {
+            try {
+                // In a real implementation, you would fetch from your Neon API
+                // const response = await fetch(`${API_BASE_URL}/books`);
+                // const books = await response.json();
+                
+                // For demo purposes, we'll use localStorage
+                const storedBooks = localStorage.getItem('books');
+                const books = storedBooks ? JSON.parse(storedBooks) : [];
+                
+                displayBooks(books);
+            } catch (error) {
+                console.error('Error fetching books:', error);
+                showStatus('Failed to load books. Please try again.', false);
+            }
+        }
 
-async function addBook(book) {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query:
-          'INSERT INTO books (title, author, year, description, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *;',
-        parameters: [book.title, book.author, book.year, book.description]
-      })
-    });
-    if (!response.ok) throw new Error('Failed to add book');
-    await fetchBooks();
-    showStatus('Book added successfully!', true);
-    bookForm.reset();
-  } catch (err) {
-    console.error(err);
-    showStatus('Failed to add book.', false);
-  }
-}
+        // Function to display books in the UI
+        function displayBooks(books) {
+            if (books.length === 0) {
+                booksContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <h3>No books in your collection yet</h3>
+                        <p>Add your first book using the form on the right</p>
+                    </div>
+                `;
+                return;
+            }
 
-bookForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const title = document.getElementById('title').value.trim();
-  const author = document.getElementById('author').value.trim();
-  const year = document.getElementById('year').value.trim() || new Date().getFullYear();
-  const description = document.getElementById('description').value.trim();
-  if (!title || !author) return showStatus('Please fill in all required fields.', false);
-  addBook({ title, author, year, description });
-});
+            booksContainer.innerHTML = books.map(book => `
+                <div class="book-card" data-id="${book.id}">
+                    <div class="book-title">${book.title}</div>
+                    <div class="book-author">by ${book.author}</div>
+                    <div class="book-year">${book.year}</div>
+                    <div class="book-description">${book.description || ''}</div>
+                    <div class="book-actions">
+                        <button class="btn btn-delete" onclick="deleteBook(${book.id})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-fetchBooks();
+        // Function to add a new book
+        async function addBook(bookData) {
+            try {
+                // In a real implementation, you would POST to your Neon API
+                // const response = await fetch(`${API_BASE_URL}/books`, {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify(bookData),
+                // });
+                
+                // For demo purposes, we'll use localStorage
+                const storedBooks = localStorage.getItem('books');
+                const books = storedBooks ? JSON.parse(storedBooks) : [];
+                
+                const newBook = {
+                    id: Date.now(), // Simple ID generation for demo
+                    ...bookData
+                };
+                
+                books.push(newBook);
+                localStorage.setItem('books', JSON.stringify(books));
+                
+                // Refresh the book list
+                fetchBooks();
+                showStatus('Book added successfully!', true);
+                
+                // Reset the form
+                bookForm.reset();
+            } catch (error) {
+                console.error('Error adding book:', error);
+                showStatus('Failed to add book. Please try again.', false);
+            }
+        }
 
+        // Function to delete a book
+        async function deleteBook(bookId) {
+            if (!confirm('Are you sure you want to remove this book?')) {
+                return;
+            }
+            
+            try {
+                // In a real implementation, you would DELETE to your Neon API
+                // await fetch(`${API_BASE_URL}/books/${bookId}`, {
+                //     method: 'DELETE',
+                // });
+                
+                // For demo purposes, we'll use localStorage
+                const storedBooks = localStorage.getItem('books');
+                let books = storedBooks ? JSON.parse(storedBooks) : [];
+                
+                books = books.filter(book => book.id !== bookId);
+                localStorage.setItem('books', JSON.stringify(books));
+                
+                // Refresh the book list
+                fetchBooks();
+                showStatus('Book removed successfully!', true);
+            } catch (error) {
+                console.error('Error deleting book:', error);
+                showStatus('Failed to remove book. Please try again.', false);
+            }
+        }
 
-async function loadBooks() {
-  const res = await fetch('/.netlify/functions/books');
-  const data = await res.json();
-  console.log(data);
-}
-loadBooks();
+        // Event listener for form submission
+        bookForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value.trim();
+            const author = document.getElementById('author').value.trim();
+            const year = document.getElementById('year').value.trim() || new Date().getFullYear();
+            const description = document.getElementById('description').value.trim();
+            
+            if (!title || !author) {
+                showStatus('Please fill in all required fields.', false);
+                return;
+            }
+            
+            addBook({ title, author, year, description });
+        });
 
-</script>
-
+        // Initial load of books
+        fetchBooks();
+    </script>
 </body>
 </html>
