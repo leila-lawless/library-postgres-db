@@ -6,7 +6,8 @@ exports.handler = async (event, context) => {
   });
 
   try {
-    const result = await pool.query('SELECT * FROM books ORDER BY created_at DESC');
+    // Simple query to get all books
+    const result = await pool.query('SELECT * FROM books ORDER BY id DESC');
     await pool.end();
     
     return {
