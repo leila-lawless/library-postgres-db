@@ -1,9 +1,19 @@
 const { Pool } = require('pg');
 
 exports.handler = async (event, context) => {
-  // Only allow POST requests
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
   const pool = new Pool({
@@ -11,28 +21,36 @@ exports.handler = async (event, context) => {
   });
 
   try {
-    const { title, author, year, description } = JSON.parse(event.body);
+    const { title, author_first, author_last, year, genre, format, book_type, isbn, publisher, description } = JSON.parse(event.body);
     
-    // Simple insert query
+    // Using our UDT method with composite type
     const result = await pool.query(
-      'INSERT INTO books (title, author, year, description) VALUES ($1, $2, $3, $4) RETURNING *',
-      [title, author, year, description]
+      `SELECT add_book_with_metadata($1, ROW($2, $3, $4::date, 'English', 0), $5::book_format, $6, $7, $8) as item_id`,
+      [title, isbn || null, publisher || 'Unknown', `${year}-01-01`, format, genre, description, book_type]
     );
     
     await pool.end();
     
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify(result.rows[0])
+      headers,
+      body: JSON.stringify({ 
+        item_id: result.rows[0].item_id,
+        title,
+        author_first,
+        author_last,
+        year,
+        genre,
+        format,
+        book_type,
+        message: 'Added using PostgreSQL UDT methods!'
+      })
     };
   } catch (error) {
     await pool.end();
     return {
       statusCode: 500,
+      headers,
       body: JSON.stringify({ error: error.message })
     };
   }
