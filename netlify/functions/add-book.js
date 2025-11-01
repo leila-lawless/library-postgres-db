@@ -13,6 +13,7 @@ exports.handler = async (event, context) => {
   try {
     const { title, author, year, description } = JSON.parse(event.body);
     
+    // Simple insert query
     const result = await pool.query(
       'INSERT INTO books (title, author, year, description) VALUES ($1, $2, $3, $4) RETURNING *',
       [title, author, year, description]
