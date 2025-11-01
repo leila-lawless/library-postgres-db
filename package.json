@@ -1,0 +1,7 @@
+{
+  "name": "book-collection",
+  "version": "1.0.0",
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}
