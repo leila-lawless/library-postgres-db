@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Dashboard - Neon Library</title>
+    <title>Simple Library Manager</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -14,25 +14,24 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #f8f9fa;
             color: #333;
             line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 30px;
+            padding: 20px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         header h1 {
@@ -47,111 +46,169 @@
             margin: 0 auto;
         }
 
-        .dashboard {
-            display: grid;
-            gap: 25px;
-            grid-template-columns: 1fr 1fr;
+        .app-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
         }
 
-        .card {
+        .books-list {
+            flex: 1;
+            min-width: 300px;
             background: white;
-            border-radius: 15px;
+            border-radius: 10px;
             padding: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        .card h2 {
+        .books-list h2 {
             color: #2c3e50;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #ec407a;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #ec407a;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #ec407a;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .data-table th {
-            background: #ec407a;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-        }
-
-        .data-table td {
-            padding: 12px;
             border-bottom: 1px solid #eee;
         }
 
-        .data-table tr:hover {
+        #books-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .book-card {
             background: #f8f9fa;
-        }
-
-        .refresh-btn {
-            background: #ec407a;
-            color: white;
-            border: none;
-            padding: 12px 20px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
+            padding: 15px;
             margin-bottom: 15px;
-            transition: background 0.3s;
+            border-left: 4px solid #ec407a;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .refresh-btn:hover {
-            background: #d81b60;
+        .book-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .status {
-            padding: 10px;
-            border-radius: 6px;
-            margin: 10px 0;
-            text-align: center;
+        .book-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .book-author {
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .book-year {
+            display: inline-block;
+            background: #fce4ec;
+            color: #ec407a;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .book-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        .add-book-form {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .add-book-form h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
             font-weight: 500;
         }
 
-        .connected {
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ec407a;
+            box-shadow: 0 0 0 2px rgba(236, 64, 122, 0.2);
+        }
+
+        .btn-primary {
+            background: #ec407a;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #d81b60;
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .success {
             background: #d4edda;
             color: #155724;
+            display: block;
         }
 
         .error {
             background: #f8d7da;
             color: #721c24;
+            display: block;
         }
 
         .empty-state {
@@ -166,37 +223,17 @@
             color: #bdc3c7;
         }
 
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
-        }
-
-        .nav-btn {
-            background: white;
-            color: #ec407a;
-            text-decoration: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: 2px solid #ec407a;
-        }
-
-        .nav-btn:hover {
-            background: #ec407a;
-            color: white;
-            transform: translateY(-2px);
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
         }
 
         @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .app-container {
+                flex-direction: column;
             }
         }
     </style>
@@ -204,278 +241,209 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-database"></i> Neon Database Dashboard</h1>
-            <p>Live view of your PostgreSQL database contents</p>
+            <h1><i class="fas fa-book"></i> Simple Library Manager</h1>
+            <p>Connected to Neon PostgreSQL Database</p>
         </header>
 
-        <div class="nav-buttons">
-            <a href="index.html" class="nav-btn">
-                <i class="fas fa-arrow-left"></i> Back to Library
-            </a>
-            <a href="https://console.neon.tech" target="_blank" class="nav-btn">
-                <i class="fas fa-external-link-alt"></i> Open Neon Console
-            </a>
-        </div>
-
-        <div class="dashboard">
-            <div class="card">
-                <h2><i class="fas fa-books"></i> Books Table</h2>
-                <button class="refresh-btn" onclick="loadBooks()">
-                    <i class="fas fa-sync-alt"></i> Refresh Books
-                </button>
-                <div id="books-status" class="status"></div>
+        <div class="app-container">
+            <section class="books-list">
+                <h2>Your Books (from Neon)</h2>
                 <div id="books-container">
                     <div class="empty-state">
                         <i class="fas fa-book-open"></i>
-                        <h3>Loading books...</h3>
-                        <p>Click refresh to load data from Neon</p>
+                        <h3>Loading books from database...</h3>
+                        <p>If this takes too long, check your Netlify functions</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="card">
-                <h2><i class="fas fa-users"></i> Authors Table</h2>
-                <button class="refresh-btn" onclick="loadAuthors()">
-                    <i class="fas fa-sync-alt"></i> Refresh Authors
-                </button>
-                <div id="authors-status" class="status"></div>
-                <div id="authors-container">
-                    <div class="empty-state">
-                        <i class="fas fa-user-edit"></i>
-                        <h3>Loading authors...</h3>
-                        <p>Click refresh to load data from Neon</p>
+            <section class="add-book-form">
+                <h2>Add New Book</h2>
+                <form id="book-form">
+                    <div class="form-group">
+                        <label for="title">Book Title *</label>
+                        <input type="text" id="title" class="form-control" placeholder="Enter book title" required>
                     </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2><i class="fas fa-chart-bar"></i> Database Statistics</h2>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-number" id="total-books">0</div>
-                        <div class="stat-label">Total Books</div>
+                    <div class="form-group">
+                        <label for="author">Author *</label>
+                        <input type="text" id="author" class="form-control" placeholder="Enter author name" required>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="total-authors">0</div>
-                        <div class="stat-label">Total Authors</div>
+                    <div class="form-group">
+                        <label for="year">Publication Year</label>
+                        <input type="number" id="year" class="form-control" placeholder="Enter publication year" min="1000" max="2030">
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="physical-books">0</div>
-                        <div class="stat-label">Physical Books</div>
+                    <div class="form-group">
+                        <label for="description">Description (Optional)</label>
+                        <textarea id="description" class="form-control" placeholder="Enter book description" rows="3"></textarea>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="digital-books">0</div>
-                        <div class="stat-label">Digital Books</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2><i class="fas fa-info-circle"></i> Database Info</h2>
-                <div id="db-info">
-                    <div class="empty-state">
-                        <i class="fas fa-database"></i>
-                        <h3>Database Connection</h3>
-                        <p>Click refresh buttons to test connection</p>
-                    </div>
-                </div>
-            </div>
+                    <button type="submit" class="btn-primary">Add Book to Database</button>
+                </form>
+                <div id="status-message" class="status-message"></div>
+            </section>
         </div>
+
+        <footer>
+            <p>Library Manager &copy; 2024 | Connected to Neon PostgreSQL</p>
+        </footer>
     </div>
 
     <script>
+        // Netlify Functions URLs
         const API_BASE_URL = '/.netlify/functions';
 
-        // Function to show status
-        function showStatus(elementId, message, isSuccess) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.className = `status ${isSuccess ? 'connected' : 'error'}`;
+        // DOM elements
+        const bookForm = document.getElementById('book-form');
+        const booksContainer = document.getElementById('books-container');
+        const statusMessage = document.getElementById('status-message');
+
+        // Function to show status message
+        function showStatus(message, isSuccess) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
         }
 
-        // Function to load books from database
-        async function loadBooks() {
-            showStatus('books-status', 'Loading books from Neon...', true);
-            
+        // Function to fetch books from Neon database
+        async function fetchBooks() {
             try {
                 const response = await fetch(`${API_BASE_URL}/books`);
                 if (!response.ok) throw new Error('Failed to fetch books');
-                
                 const books = await response.json();
+                
                 displayBooks(books);
-                updateStatistics(books, []);
-                showStatus('books-status', `✅ Successfully loaded ${books.length} books from Neon`, true);
-                
             } catch (error) {
-                console.error('Error loading books:', error);
-                showStatus('books-status', '❌ Failed to load books. Check your Netlify functions.', false);
-                displaySampleBooks();
+                console.error('Error fetching books:', error);
+                showStatus('Failed to load books from database. Check Netlify functions.', false);
+                
+                // Show sample data so you can at least see the UI works
+                loadSampleData();
             }
         }
 
-        // Function to load authors from database
-        async function loadAuthors() {
-            showStatus('authors-status', 'Loading authors from Neon...', true);
-            
-            try {
-                // This would call your authors function
-                const response = await fetch(`${API_BASE_URL}/authors`);
-                if (!response.ok) throw new Error('Failed to fetch authors');
-                
-                const authors = await response.json();
-                displayAuthors(authors);
-                updateStatistics([], authors);
-                showStatus('authors-status', `✅ Successfully loaded ${authors.length} authors from Neon`, true);
-                
-            } catch (error) {
-                console.error('Error loading authors:', error);
-                showStatus('authors-status', '❌ Failed to load authors. Function might not exist yet.', false);
-                displaySampleAuthors();
-            }
-        }
-
-        // Function to display books in table
+        // Function to display books in the UI
         function displayBooks(books) {
-            const container = document.getElementById('books-container');
-            
             if (books.length === 0) {
-                container.innerHTML = `
+                booksContainer.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-book-open"></i>
-                        <h3>No books in database</h3>
-                        <p>Add books using the main library interface</p>
+                        <h3>No books in your database yet</h3>
+                        <p>Add your first book using the form on the right</p>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Author</th>
-                            <th>Year</th>
-                            <th>Type</th>
-                            <th>Created</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${books.map(book => `
-                            <tr>
-                                <td><strong>${book.item_id || book.id}</strong></td>
-                                <td>${book.title}</td>
-                                <td>${book.author || `${book.author_first} ${book.author_last}`}</td>
-                                <td>${book.year}</td>
-                                <td>${book.format || book.type}</td>
-                                <td>${new Date(book.created_at).toLocaleDateString()}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+            booksContainer.innerHTML = books.map(book => `
+                <div class="book-card">
+                    <div class="book-title">${book.title}</div>
+                    <div class="book-author">by ${book.author}</div>
+                    <div class="book-year">${book.year}</div>
+                    <div class="book-description">${book.description || ''}</div>
+                    <div class="book-actions">
+                        <button class="btn btn-delete" onclick="deleteBook(${book.id})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Function to display authors in table
-        function displayAuthors(authors) {
-            const container = document.getElementById('authors-container');
+        // Function to add a new book to Neon
+        async function addBook(bookData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/add-book`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(bookData),
+                });
+                
+                if (!response.ok) throw new Error('Failed to add book');
+                
+                // Refresh the book list from database
+                fetchBooks();
+                showStatus('Book added successfully to Neon database!', true);
+                
+                // Reset the form
+                bookForm.reset();
+            } catch (error) {
+                console.error('Error adding book:', error);
+                showStatus('Failed to add book to database. Check your Netlify function.', false);
+            }
+        }
+
+        // Function to delete a book from Neon
+        async function deleteBook(bookId) {
+            if (!confirm('Are you sure you want to remove this book from the database?')) {
+                return;
+            }
             
-            if (authors.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-user-edit"></i>
-                        <h3>No authors in database</h3>
-                        <p>Authors will appear when you add books</p>
-                    </div>
-                `;
-                return;
+            try {
+                const response = await fetch(`${API_BASE_URL}/delete-book`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ bookId })
+                });
+                
+                if (!response.ok) throw new Error('Failed to delete book');
+                
+                // Refresh the book list
+                fetchBooks();
+                showStatus('Book removed successfully from database!', true);
+            } catch (error) {
+                console.error('Error deleting book:', error);
+                showStatus('Failed to remove book from database.', false);
             }
-
-            container.innerHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Email</th>
-                            <th>Books</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${authors.map(author => `
-                            <tr>
-                                <td><strong>${author.person_id || author.id}</strong></td>
-                                <td>${author.first_name}</td>
-                                <td>${author.last_name}</td>
-                                <td>${author.email || 'N/A'}</td>
-                                <td>${author.book_count || '0'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
         }
 
-        // Function to update statistics
-        function updateStatistics(books, authors) {
-            document.getElementById('total-books').textContent = books.length;
-            document.getElementById('total-authors').textContent = authors.length;
-            document.getElementById('physical-books').textContent = books.filter(b => b.format === 'PHYSICAL').length;
-            document.getElementById('digital-books').textContent = books.filter(b => b.format === 'DIGITAL').length;
-        }
-
-        // Sample data for demonstration
-        function displaySampleBooks() {
+        // Load sample data if database connection fails
+        function loadSampleData() {
             const sampleBooks = [
                 {
                     id: 1,
                     title: "The Great Gatsby",
-                    author: "F. Scott Fitzgerald", 
+                    author: "F. Scott Fitzgerald",
                     year: 1925,
-                    type: "BOOK",
-                    created_at: "2024-01-15"
-                },
-                {
-                    id: 2, 
-                    title: "Digital Revolution",
-                    author: "Ada Lovelace",
-                    year: 2023,
-                    type: "EBOOK", 
-                    created_at: "2024-01-16"
-                }
-            ];
-            displayBooks(sampleBooks);
-            updateStatistics(sampleBooks, []);
-        }
-
-        function displaySampleAuthors() {
-            const sampleAuthors = [
-                {
-                    id: 1,
-                    first_name: "F. Scott",
-                    last_name: "Fitzgerald",
-                    email: "fitzgerald@example.com",
-                    book_count: 1
+                    description: "A classic novel of the Jazz Age"
                 },
                 {
                     id: 2,
-                    first_name: "Ada", 
-                    last_name: "Lovelace",
-                    email: "ada@example.com",
-                    book_count: 1
+                    title: "To Kill a Mockingbird", 
+                    author: "Harper Lee",
+                    year: 1960,
+                    description: "A novel about racial inequality"
                 }
             ];
-            displayAuthors(sampleAuthors);
-            updateStatistics([], sampleAuthors);
+            
+            displayBooks(sampleBooks);
+            showStatus('Showing sample data. Check your Netlify functions for database connection.', false);
         }
 
-        // Load books automatically when page loads
-        window.onload = function() {
-            loadBooks();
-            // loadAuthors(); // Uncomment when you create authors function
-        };
+        // Event listener for form submission
+        bookForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value.trim();
+            const author = document.getElementById('author').value.trim();
+            const year = document.getElementById('year').value.trim() || new Date().getFullYear();
+            const description = document.getElementById('description').value.trim();
+            
+            if (!title || !author) {
+                showStatus('Please fill in all required fields.', false);
+                return;
+            }
+            
+            addBook({ title, author, year, description });
+        });
+
+        // Initial load of books from database
+        fetchBooks();
     </script>
 </body>
 </html>
