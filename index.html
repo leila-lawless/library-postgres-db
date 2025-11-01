@@ -3,237 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Library Manager</title>
+    <title>PostgreSQL Library Manager</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
         body {
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: #fafafa;
+            color: #2d3748;
             line-height: 1.6;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px;
         }
 
         header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 20px;
+            padding: 30px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f1f1;
         }
 
         header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 2.2rem;
         }
 
         header p {
-            color: #7f8c8d;
+            color: #718096;
             max-width: 600px;
             margin: 0 auto;
         }
 
         .app-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 400px;
             gap: 30px;
-            flex-wrap: wrap;
+            align-items: start;
         }
 
-        .books-list {
-            flex: 1;
-            min-width: 300px;
+        .books-section {
             background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f1f1;
         }
 
-        .books-list h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+        .search-box {
+            margin-bottom: 25px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #ec4899;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+
+        .section-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .section-header h2 {
+            color: #1a202c;
+            font-weight: 600;
+            font-size: 1.4rem;
         }
 
         #books-container {
-            max-height: 600px;
+            max-height: 700px;
             overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        #books-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #books-container::-webkit-scrollbar-track {
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        #books-container::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
         }
 
         .book-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #ec407a;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #f1f1f1;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         }
 
         .book-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-color: #ec4899;
+        }
+
+        .book-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
         }
 
         .book-title {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1.2rem;
-            color: #2c3e50;
-            margin-bottom: 5px;
+            color: #1a202c;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .book-type {
+            background: #fdf2f8;
+            color: #ec4899;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #fbcfe8;
+        }
+
+        .book-meta {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .book-author {
-            color: #7f8c8d;
-            margin-bottom: 8px;
+            color: #ec4899;
+            font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .book-year {
-            display: inline-block;
-            background: #fce4ec;
-            color: #ec407a;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            background: #f7fafc;
+            color: #718096;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .book-format {
+            background: #ec4899;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .book-description {
+            color: #718096;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            font-size: 0.9rem;
         }
 
         .book-actions {
-            margin-top: 10px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .btn {
-            padding: 6px 12px;
+            padding: 8px 14px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.85rem;
-            transition: background-color 0.2s;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .btn-delete {
-            background: #e74c3c;
-            color: white;
+            background: white;
+            color: #e53e3e;
+            border: 1px solid #fed7d7;
         }
 
         .btn-delete:hover {
-            background: #c0392b;
+            background: #fed7d7;
         }
 
-        .add-book-form {
-            flex: 1;
-            min-width: 300px;
+        .forms-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .form-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f1f1;
         }
 
-        .add-book-form h2 {
-            color: #2c3e50;
+        .form-card h2 {
+            color: #1a202c;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            font-size: 1.3rem;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #2c3e50;
-            font-weight: 500;
+            margin-bottom: 6px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 0.85rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            background: white;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: #ec407a;
-            box-shadow: 0 0 0 2px rgba(236, 64, 122, 0.2);
+            border-color: #ec4899;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         .btn-primary {
-            background: #ec407a;
+            background: #ec4899;
             color: white;
-            padding: 12px 20px;
+            padding: 14px 20px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             font-size: 1rem;
             cursor: pointer;
             width: 100%;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .btn-primary:hover {
-            background: #d81b60;
+            background: #db2777;
         }
 
         .status-message {
-            padding: 12px;
-            border-radius: 6px;
+            padding: 14px;
+            border-radius: 10px;
             margin-top: 20px;
             text-align: center;
-            font-weight: 500;
+            font-weight: 600;
             display: none;
         }
 
         .success {
-            background: #d4edda;
-            color: #155724;
+            background: #f0fff4;
+            color: #2d7d32;
+            border: 1px solid #c6f6d5;
             display: block;
         }
 
         .error {
-            background: #f8d7da;
-            color: #721c24;
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
             display: block;
         }
 
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: #7f8c8d;
+            padding: 50px 20px;
+            color: #718096;
         }
 
         .empty-state i {
             font-size: 3rem;
             margin-bottom: 15px;
-            color: #bdc3c7;
+            color: #e2e8f0;
         }
 
         footer {
             text-align: center;
             margin-top: 40px;
             padding: 20px;
-            color: #7f8c8d;
+            color: #a0aec0;
             font-size: 0.9rem;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1200px) {
             .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .book-header {
                 flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
@@ -241,109 +358,160 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-book"></i> Simple Library Manager</h1>
-            <p>Connected to Neon PostgreSQL Database</p>
+            <h1><i class="fas fa-database"></i> PostgreSQL Library Manager</h1>
+            <p>Advanced Object-Relational Features: Custom Types, Inheritance & UDT Methods</p>
         </header>
 
         <div class="app-container">
-            <section class="books-list">
-                <h2>Your Books (from Neon)</h2>
+            <section class="books-section">
+                <div class="search-box">
+                    <input type="text" id="search" class="form-control" placeholder="Search books by title, author, or genre...">
+                </div>
+                <div class="section-header">
+                    <h2>Library Collection</h2>
+                </div>
                 <div id="books-container">
                     <div class="empty-state">
                         <i class="fas fa-book-open"></i>
-                        <h3>Loading books from database...</h3>
-                        <p>If this takes too long, check your Netlify functions</p>
+                        <h3>Your library is empty</h3>
+                        <p>Add your first book using the form on the right</p>
                     </div>
                 </div>
             </section>
 
-            <section class="add-book-form">
-                <h2>Add New Book</h2>
-                <form id="book-form">
-                    <div class="form-group">
-                        <label for="title">Book Title *</label>
-                        <input type="text" id="title" class="form-control" placeholder="Enter book title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="author">Author *</label>
-                        <input type="text" id="author" class="form-control" placeholder="Enter author name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="year">Publication Year</label>
-                        <input type="number" id="year" class="form-control" placeholder="Enter publication year" min="1000" max="2030">
-                    </div>
-                    <div class="form-group">
-                        <label for="description">Description (Optional)</label>
-                        <textarea id="description" class="form-control" placeholder="Enter book description" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary">Add Book to Database</button>
-                </form>
-                <div id="status-message" class="status-message"></div>
+            <section class="forms-section">
+                <div class="form-card">
+                    <h2>Add New Book</h2>
+                    <form id="book-form">
+                        <div class="form-group">
+                            <label for="title">Book Title *</label>
+                            <input type="text" id="title" class="form-control" placeholder="Enter book title" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="author-first">Author First Name *</label>
+                                <input type="text" id="author-first" class="form-control" placeholder="First name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="author-last">Author Last Name *</label>
+                                <input type="text" id="author-last" class="form-control" placeholder="Last name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="year">Publication Year</label>
+                                <input type="number" id="year" class="form-control" placeholder="2024" min="1000" max="2030">
+                            </div>
+                            <div class="form-group">
+                                <label for="genre">Genre</label>
+                                <input type="text" id="genre" class="form-control" placeholder="Fiction, Science, etc.">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="format">Format *</label>
+                                <select id="format" class="form-control" required>
+                                    <option value="PHYSICAL">Physical Book</option>
+                                    <option value="DIGITAL">Digital Book</option>
+                                    <option value="AUDIO">Audio Book</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="book-type">Book Type *</label>
+                                <select id="book-type" class="form-control" required>
+                                    <option value="BOOK">Regular Book</option>
+                                    <option value="EBOOK">E-Book</option>
+                                    <option value="MAGAZINE">Magazine</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="isbn">ISBN</label>
+                            <input type="text" id="isbn" class="form-control" placeholder="International Standard Book Number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="publisher">Publisher</label>
+                            <input type="text" id="publisher" class="form-control" placeholder="Book publisher">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" class="form-control" placeholder="Enter book description" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            Add to Library
+                        </button>
+                    </form>
+                    <div id="status-message" class="status-message"></div>
+                </div>
             </section>
         </div>
 
         <footer>
-            <p>Library Manager &copy; 2024 | Connected to Neon PostgreSQL</p>
+            <p>PostgreSQL Library Manager &copy; 2024 | Custom Types, Inheritance & UDT Methods</p>
         </footer>
     </div>
 
     <script>
-        // Netlify Functions URLs
         const API_BASE_URL = '/.netlify/functions';
 
-        // DOM elements
         const bookForm = document.getElementById('book-form');
         const booksContainer = document.getElementById('books-container');
         const statusMessage = document.getElementById('status-message');
+        const searchInput = document.getElementById('search');
 
-        // Function to show status message
         function showStatus(message, isSuccess) {
             statusMessage.textContent = message;
             statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
-            
-            setTimeout(() => {
-                statusMessage.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { statusMessage.style.display = 'none'; }, 5000);
         }
 
-        // Function to fetch books from Neon database
         async function fetchBooks() {
             try {
                 const response = await fetch(`${API_BASE_URL}/books`);
                 if (!response.ok) throw new Error('Failed to fetch books');
                 const books = await response.json();
-                
                 displayBooks(books);
             } catch (error) {
-                console.error('Error fetching books:', error);
-                showStatus('Failed to load books from database. Check Netlify functions.', false);
-                
-                // Show sample data so you can at least see the UI works
+                console.error('Error:', error);
+                showStatus('Database connection failed. Using demo data.', false);
                 loadSampleData();
             }
         }
 
-        // Function to display books in the UI
         function displayBooks(books) {
             if (books.length === 0) {
                 booksContainer.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-book-open"></i>
-                        <h3>No books in your database yet</h3>
-                        <p>Add your first book using the form on the right</p>
-                    </div>
-                `;
+                        <h3>No books in database</h3>
+                        <p>Add your first book using the form</p>
+                    </div>`;
                 return;
             }
 
             booksContainer.innerHTML = books.map(book => `
                 <div class="book-card">
-                    <div class="book-title">${book.title}</div>
-                    <div class="book-author">by ${book.author}</div>
-                    <div class="book-year">${book.year}</div>
-                    <div class="book-description">${book.description || ''}</div>
+                    <div class="book-header">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-type">${book.book_type}</div>
+                    </div>
+                    <div class="book-meta">
+                        <div class="book-author">${book.author_first} ${book.author_last}</div>
+                        <div class="book-year">${book.year}</div>
+                        <div class="book-format">${book.format}</div>
+                    </div>
+                    ${book.genre ? `<div class="book-meta"><strong>Genre:</strong> ${book.genre}</div>` : ''}
+                    ${book.publisher ? `<div class="book-meta"><strong>Publisher:</strong> ${book.publisher}</div>` : ''}
+                    ${book.description ? `<div class="book-description">${book.description}</div>` : ''}
                     <div class="book-actions">
-                        <button class="btn btn-delete" onclick="deleteBook(${book.id})">
+                        <button class="btn btn-delete" onclick="deleteBook(${book.item_id})">
                             <i class="fas fa-trash"></i> Remove
                         </button>
                     </div>
@@ -351,98 +519,92 @@
             `).join('');
         }
 
-        // Function to add a new book to Neon
         async function addBook(bookData) {
             try {
                 const response = await fetch(`${API_BASE_URL}/add-book`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(bookData),
                 });
-                
                 if (!response.ok) throw new Error('Failed to add book');
-                
-                // Refresh the book list from database
                 fetchBooks();
-                showStatus('Book added successfully to Neon database!', true);
-                
-                // Reset the form
+                showStatus('Book added to PostgreSQL with UDTs!', true);
                 bookForm.reset();
             } catch (error) {
-                console.error('Error adding book:', error);
-                showStatus('Failed to add book to database. Check your Netlify function.', false);
+                console.error('Error:', error);
+                showStatus('Failed to add book.', false);
             }
         }
 
-        // Function to delete a book from Neon
         async function deleteBook(bookId) {
-            if (!confirm('Are you sure you want to remove this book from the database?')) {
-                return;
-            }
-            
+            if (!confirm('Remove this book?')) return;
             try {
                 const response = await fetch(`${API_BASE_URL}/delete-book`, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ bookId })
                 });
-                
-                if (!response.ok) throw new Error('Failed to delete book');
-                
-                // Refresh the book list
+                if (!response.ok) throw new Error('Failed to delete');
                 fetchBooks();
-                showStatus('Book removed successfully from database!', true);
+                showStatus('Book removed!', true);
             } catch (error) {
-                console.error('Error deleting book:', error);
-                showStatus('Failed to remove book from database.', false);
+                console.error('Error:', error);
+                showStatus('Failed to remove book.', false);
             }
         }
 
-        // Load sample data if database connection fails
+        function searchBooks() {
+            const query = searchInput.value.toLowerCase().trim();
+            if (!query) return fetchBooks();
+            
+            const books = document.querySelectorAll('.book-card');
+            let found = false;
+            books.forEach(book => {
+                const text = book.textContent.toLowerCase();
+                book.style.display = text.includes(query) ? 'block' : 'none';
+                if (text.includes(query)) found = true;
+            });
+            if (!found) {
+                booksContainer.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><h3>No results for "${query}"</h3></div>`;
+            }
+        }
+
         function loadSampleData() {
             const sampleBooks = [
                 {
-                    id: 1,
-                    title: "The Great Gatsby",
-                    author: "F. Scott Fitzgerald",
-                    year: 1925,
-                    description: "A classic novel of the Jazz Age"
-                },
-                {
-                    id: 2,
-                    title: "To Kill a Mockingbird", 
-                    author: "Harper Lee",
-                    year: 1960,
-                    description: "A novel about racial inequality"
+                    item_id: 1, title: "The Great Gatsby", author_first: "F. Scott", author_last: "Fitzgerald",
+                    year: 1925, genre: "Classic Fiction", format: "PHYSICAL", book_type: "BOOK", 
+                    publisher: "Scribner", description: "A classic novel of the Jazz Age"
                 }
             ];
-            
             displayBooks(sampleBooks);
-            showStatus('Showing sample data. Check your Netlify functions for database connection.', false);
         }
 
-        // Event listener for form submission
         bookForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
             const title = document.getElementById('title').value.trim();
-            const author = document.getElementById('author').value.trim();
+            const authorFirst = document.getElementById('author-first').value.trim();
+            const authorLast = document.getElementById('author-last').value.trim();
             const year = document.getElementById('year').value.trim() || new Date().getFullYear();
+            const genre = document.getElementById('genre').value.trim();
+            const format = document.getElementById('format').value;
+            const bookType = document.getElementById('book-type').value;
+            const isbn = document.getElementById('isbn').value.trim();
+            const publisher = document.getElementById('publisher').value.trim();
             const description = document.getElementById('description').value.trim();
             
-            if (!title || !author) {
-                showStatus('Please fill in all required fields.', false);
+            if (!title || !authorFirst || !authorLast) {
+                showStatus('Please fill required fields.', false);
                 return;
             }
             
-            addBook({ title, author, year, description });
+            addBook({ title, author_first: authorFirst, author_last: authorLast, year, genre, format, book_type: bookType, isbn, publisher, description });
         });
 
-        // Initial load of books from database
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchBooks();
+        });
+
         fetchBooks();
     </script>
 </body>
